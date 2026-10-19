@@ -14,7 +14,7 @@ const HINTS = {
 export function reminder(autoUse) {
   const lines = autoUse.filter((t) => HINTS[t]).map((t) => HINTS[t]);
   if (!lines.length) return '';
-  return ['local-llm-worker: a local LLM does bulk work off your context (ToolSearch "local-llm-worker" if deferred).', ...lines].join('\n');
+  return ['localize: a local LLM does bulk work off your context (ToolSearch "localize" if deferred).', ...lines].join('\n');
 }
 
 let autoUse = DEFAULTS.auto_use;

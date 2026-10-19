@@ -1,16 +1,16 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.JoblessJoe/local-llm-worker",
+  "name": "io.github.JoblessJoe/localize",
   "description": "Local LLM does Claude's bulk work: reads logs and files, researches the web, writes test-gated code.",
   "repository": {
-    "url": "https://github.com/JoblessJoe/local-llm-worker",
+    "url": "https://github.com/JoblessJoe/localize",
     "source": "github"
   },
   "version": "0.1.5",
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "local-llm-worker",
+      "identifier": "localize-mcp",
       "version": "0.1.5",
       "transport": {
         "type": "stdio"

@@ -75,7 +75,7 @@ const TOOLS = [
   },
   {
     name: 'configure',
-    description: 'Set up or change local-llm-worker (backend URL, models, search, which tools to use automatically via auto_use). No arguments: effective config, where each value comes from, '
+    description: 'Set up or change localize (backend URL, models, search, which tools to use automatically via auto_use). No arguments: effective config, where each value comes from, '
       + 'config file paths, detected backend API, reachability and the backend\'s model list. '
       + 'With {set, scope}: merge keys into the user or project config file (null removes a key). '
       + 'Changes apply on the next call without a restart. Call this first on a new machine.',
@@ -145,7 +145,7 @@ async function handle(msg) {
       return {
         protocolVersion: params?.protocolVersion || '2025-06-18',
         capabilities: { tools: {} },
-        serverInfo: { name: 'local-llm-worker', version: VERSION },
+        serverInfo: { name: 'localize', version: VERSION },
       };
     case 'ping':
       return {};

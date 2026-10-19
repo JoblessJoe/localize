@@ -1,11 +1,11 @@
 {
-  "name": "local-llm-worker",
+  "name": "localize",
   "owner": {
     "name": "Johannes Tebbert"
   },
   "plugins": [
     {
-      "name": "local-llm-worker",
+      "name": "localize",
       "source": "./",
       "description": "Local LLM does Claude's bulk work: reads logs and files, researches the web, writes test-gated code.",
       "version": "0.1.5"

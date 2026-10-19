@@ -1,11 +1,11 @@
 {
-  "name": "local-llm-worker",
+  "name": "localize-mcp",
   "version": "0.1.5",
   "description": "Local LLM does Claude's bulk work: reads logs and files, researches the web, writes test-gated code.",
   "type": "module",
   "main": "src/worker.js",
   "bin": {
-    "local-llm-worker": "src/index.js"
+    "localize-mcp": "src/index.js"
   },
   "scripts": {
     "test": "node --test test/worker.test.js test/hardening.test.js test/edge-cases.test.js",
@@ -39,13 +39,13 @@
   ],
   "author": "Johannes Tebbert <info@joblessjoe.com> (https://joblessjoe.com)",
   "license": "MIT",
-  "mcpName": "io.github.JoblessJoe/local-llm-worker",
+  "mcpName": "io.github.JoblessJoe/localize",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/JoblessJoe/local-llm-worker.git"
+    "url": "git+https://github.com/JoblessJoe/localize.git"
   },
-  "homepage": "https://joblessjoe.com/local-llm-worker",
+  "homepage": "https://joblessjoe.com/localize",
   "bugs": {
-    "url": "https://github.com/JoblessJoe/local-llm-worker/issues"
+    "url": "https://github.com/JoblessJoe/localize/issues"
   }
 }

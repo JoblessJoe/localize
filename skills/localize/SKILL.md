@@ -1,9 +1,9 @@
 ---
-name: local-llm-worker
+name: localize
 description: Use the user's local LLM so bulk tokens stay out of your context. Use when you are about to run a test suite, build or command with long output, read a log, or open a large file just to find one thing (offload); when you need to look something up on the web, check docs or verify current versions (research, instead of WebSearch/WebFetch); or when asked to add, write or implement a small function, helper or file that tests can pin down (write the test, then delegate). Also for setting up or changing the plugin (configure). Not for tiny inputs or work the user wants done by you.
 ---
 
-# local-llm-worker
+# localize
 
 Three tools run on the user's own hardware, so the bulk tokens never touch your context:
 
@@ -44,12 +44,12 @@ reachable and which models it serves.
   lines for the tools they picked. Show them the text first.
 
   ```markdown
-  ## Local LLM (local-llm-worker)
+  ## Local LLM (localize)
   - Run test suites, builds and other noisy commands through `offload` (`command`), and read logs or files over ~300 lines through it, instead of reading the output yourself.
   - Use `research` for web lookups instead of WebSearch/WebFetch.
   - For new functions or files bigger than their tests: write the tests first, then `delegate` the implementation. Run independent delegates in parallel.
   ```
-- `scope: "project"` writes `<git root>/.local-llm-worker.json` instead of the user file.
+- `scope: "project"` writes `<git root>/.localize.json` instead of the user file.
   A `null` value removes a key. Changes apply on the next call; nothing restarts.
 
 ## Delegate playbook

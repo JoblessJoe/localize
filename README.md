@@ -1,16 +1,18 @@
 <div align="center">
 
-# local-llm-worker
+# localize
 
 **Let Claude hand the bulk reading to your local LLM: test logs, big files, web pages. Claude only gets the answer.**
 
-[![test](https://github.com/JoblessJoe/local-llm-worker/actions/workflows/test.yml/badge.svg)](https://github.com/JoblessJoe/local-llm-worker/actions/workflows/test.yml)
+[![test](https://github.com/JoblessJoe/localize/actions/workflows/test.yml/badge.svg)](https://github.com/JoblessJoe/localize/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node ≥ 18](https://img.shields.io/badge/node-%E2%89%A5%2018-339933.svg)](package.json)
 [![Zero dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](package.json)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757.svg)](#install)
 [![MCP server](https://img.shields.io/badge/MCP-server-6e56cf.svg)](#use-it-in-any-mcp-client)
-[![Website](https://img.shields.io/badge/website-joblessjoe.com-38cabb.svg)](https://joblessjoe.com/local-llm-worker)
+[![Website](https://img.shields.io/badge/website-joblessjoe.com-38cabb.svg)](https://joblessjoe.com/localize)
+
+<sub>Formerly <code>local-llm-worker</code>. npm: <code>localize-mcp</code></sub>
 
 Works with Ollama · llama.cpp · LM Studio · vLLM · LocalAI · any OpenAI-compatible endpoint
 
@@ -19,7 +21,7 @@ Works with Ollama · llama.cpp · LM Studio · vLLM · LocalAI · any OpenAI-com
 ---
 
 Reading a 5,000-line test log or three docs pages costs the same frontier-model tokens as hard
-architectural work. **local-llm-worker** is an MCP server and Claude Code plugin that moves
+architectural work. **localize** is an MCP server and Claude Code plugin that moves
 that bulk work onto the GPU (or CPU) you already own:
 
 - **`offload`**: your local model runs the noisy command or reads the big file. Claude gets
@@ -64,11 +66,11 @@ value:10}) returns -5, expected 0.
 ### Claude Code plugin
 
 ```text
-/plugin marketplace add JoblessJoe/local-llm-worker
-/plugin install local-llm-worker@local-llm-worker
+/plugin marketplace add JoblessJoe/localize
+/plugin install localize@localize
 ```
 
-Then just ask: *"set up local-llm-worker for my machine"*. Claude finds your backend, picks a
+Then just ask: *"set up localize for my machine"*. Claude finds your backend, picks a
 model, and asks which tools it should use on its own (`auto_use`). By default that's `offload`
 and `research`; `delegate` is opt-in. Every tool also works whenever you ask for it.
 
@@ -78,7 +80,7 @@ A session-start reminder nudges Claude toward the tools you chose. For dependabl
 this to your `CLAUDE.md`; setup offers to do it for you:
 
 ```markdown
-## Local LLM (local-llm-worker)
+## Local LLM (localize)
 - Run test suites, builds and other noisy commands through `offload` (`command`), and read logs or files over ~300 lines through it, instead of reading the output yourself.
 - Use `research` for web lookups instead of WebSearch/WebFetch.
 ```
@@ -93,9 +95,9 @@ Claude Desktop, Cursor, Windsurf, and others:
 ```json
 {
   "mcpServers": {
-    "local-llm-worker": {
+    "localize": {
       "command": "node",
-      "args": ["/path/to/local-llm-worker/src/index.js"],
+      "args": ["/path/to/localize/src/index.js"],
       "env": { "LLW_MODEL": "qwen3-coder:30b" }
     }
   }
@@ -103,7 +105,7 @@ Claude Desktop, Cursor, Windsurf, and others:
 ```
 
 Claude Code without the plugin:
-`claude mcp add local-llm-worker -- node /path/to/local-llm-worker/src/index.js`
+`claude mcp add localize -- node /path/to/localize/src/index.js`
 
 ## How `delegate` works
 
@@ -133,7 +135,7 @@ flowchart LR
   kept ones older than 24 h. Untracked files over 10 MB are not copied into the worktree (the
   verdict says how many were skipped).
 
-The bundled [skill](skills/local-llm-worker/SKILL.md) teaches Claude how to write specs that
+The bundled [skill](skills/localize/SKILL.md) teaches Claude how to write specs that
 pass: one invariant per test, exact API surface in `context`, properties instead of examples, and
 never delegating auth or money code.
 
@@ -169,8 +171,8 @@ attempt to the third. `offload` and `research` work well with any of these. Ever
 Agents should use `configure`. Humans can edit JSON. Layers (later wins):
 
 1. built-in defaults
-2. user: `~/.config/local-llm-worker/config.json` (respects `$XDG_CONFIG_HOME`)
-3. project: `<git root>/.local-llm-worker.json`
+2. user: `~/.config/localize/config.json` (respects `$XDG_CONFIG_HOME`)
+3. project: `<git root>/.localize.json`
 4. env: `LLW_<KEY>`, e.g. `LLW_BASE_URL`, `LLW_MODEL`. Integers are digits only, booleans
    `true`/`false`/`1`/`0`/`yes`/`no`, `link_dirs` a comma list or JSON array, `headers` a JSON
    object. An invalid value is ignored and `configure` lists it under `warnings`.
@@ -199,7 +201,7 @@ A config file with invalid JSON is an error that names the file.
 | `test_timeout_ms` | `600000` | Per test / command run. |
 | `max_attempts` | `3` | Delegate rounds (cap 10). |
 | `link_dirs` | `node_modules, .venv, venv, vendor` | Symlinked into each worktree. |
-| `log_path` | `~/.local-llm-worker/runs.jsonl` | Run log; `""` disables. |
+| `log_path` | `~/.localize/runs.jsonl` | Run log; `""` disables. |
 | `auto_use` | `offload, research` | Tools Claude uses on its own, via a short session-start reminder. `delegate` is opt-in. Every tool still works when you ask for it; `[]` turns the reminder off. |
 
 ```jsonc
@@ -293,7 +295,7 @@ Every run appends one line to `log_path`:
 ```
 
 ```sh
-jq -s 'group_by(.tool) | map({tool: .[0].tool, runs: length, ok: (map(select(.ok)) | length), out_tok: (map(.out_tok) | add)})' ~/.local-llm-worker/runs.jsonl
+jq -s 'group_by(.tool) | map({tool: .[0].tool, runs: length, ok: (map(select(.ok)) | length), out_tok: (map(.out_tok) | add)})' ~/.localize/runs.jsonl
 ```
 
 ## FAQ

@@ -4,6 +4,7 @@
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import dns from 'node:dns';
+import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import https from 'node:https';
@@ -36,7 +37,7 @@ export const DEFAULTS = Object.freeze({
   test_timeout_ms: 600000,
   max_attempts: 3,
   link_dirs: ['node_modules', '.venv', 'venv', 'vendor'],
-  log_path: '~/.local-llm-worker/runs.jsonl',
+  log_path: '~/.localize/runs.jsonl',
   auto_use: ['offload', 'research'],
 });
 
@@ -151,11 +152,16 @@ function homeDir(env) {
 
 export function userConfigPath(env = process.env) {
   const base = env.XDG_CONFIG_HOME || path.join(homeDir(env), '.config');
-  return path.join(base, 'local-llm-worker', 'config.json');
+  return withLegacy(path.join(base, 'localize', 'config.json'), path.join(base, 'local-llm-worker', 'config.json'));
 }
 
 export function projectConfigPath(root) {
-  return path.join(root, '.local-llm-worker.json');
+  return withLegacy(path.join(root, '.localize.json'), path.join(root, '.local-llm-worker.json'));
+}
+
+// Renamed from local-llm-worker: keep reading (and writing) an existing old-name file.
+function withLegacy(current, legacy) {
+  return !existsSync(current) && existsSync(legacy) ? legacy : current;
 }
 
 function expandHome(p, env) {
@@ -649,7 +655,7 @@ async function logRun(config, entry) {
     await fs.mkdir(path.dirname(config.log_path), { recursive: true });
     await fs.appendFile(config.log_path, JSON.stringify({ ts: new Date().toISOString(), ...entry }) + '\n');
   } catch (err) {
-    process.stderr.write(`local-llm-worker: cannot write log ${config.log_path}: ${err.message}\n`);
+    process.stderr.write(`localize: cannot write log ${config.log_path}: ${err.message}\n`);
   }
 }
 
@@ -1118,7 +1124,7 @@ async function fetchPage(url, ms, policy = {}) {
         signal,
         redirect: 'manual',
         headers: {
-          'user-agent': 'Mozilla/5.0 (compatible; local-llm-worker)',
+          'user-agent': 'Mozilla/5.0 (compatible; localize)',
           accept: 'text/html,application/xhtml+xml,text/plain,application/json;q=0.9,*/*;q=0.5',
         },
       });
@@ -1612,7 +1618,7 @@ export async function delegate(args = {}, ctx = {}) {
       try {
         await removeWorktree(root, wt);
       } catch (err) {
-        process.stderr.write(`local-llm-worker: cannot remove worktree ${wt.dir}: ${err.message}\n`);
+        process.stderr.write(`localize: cannot remove worktree ${wt.dir}: ${err.message}\n`);
       }
     }
     await logRun(config, {

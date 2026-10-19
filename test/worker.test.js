@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import {
   loadConfig, configure, offload, delegate, detectApi, chat, extractFailures,
   extractCode, normalizeBaseUrl, stripThink, DEFAULTS, research, htmlToText, run,
+  userConfigPath, projectConfigPath,
 } from '../src/worker.js';
 import {
   tmpdir, sh, write, makeRepo, fakeBackend, fakeWeb, makeCtx, TAP_CMD, nodeCmd, baseEnv,
@@ -387,9 +388,9 @@ describe('config', SUITE, () => {
   test('layering: defaults < user < project < env, with sources', async () => {
     const root = await makeRepo();
     const ctx = await makeCtx(path.join(root), { LLW_NUM_CTX: '8192', LLW_LINK_DIRS: 'a, b' });
-    await write(path.join(ctx.env.XDG_CONFIG_HOME, 'local-llm-worker/config.json'),
+    await write(path.join(ctx.env.XDG_CONFIG_HOME, 'localize/config.json'),
       JSON.stringify({ model: 'user-model', base_url: 'http://box:1234/v1/', num_ctx: 1000, concurrency: 2 }));
-    await write(path.join(root, '.local-llm-worker.json'), JSON.stringify({ model: 'project-model', concurrency: 'x' }));
+    await write(path.join(root, '.localize.json'), JSON.stringify({ model: 'project-model', concurrency: 'x' }));
     await fs.mkdir(path.join(root, 'sub'));
     const { config, sources, files, warnings } = await loadConfig({ ...ctx, cwd: path.join(root, 'sub') });
     assert.equal(config.model, 'project-model');
@@ -403,7 +404,19 @@ describe('config', SUITE, () => {
     assert.match(warnings.join('\n'), /concurrency must be a positive integer/);
     assert.equal(config.timeout_ms, DEFAULTS.timeout_ms);
     assert.equal(sources.timeout_ms, 'default');
-    assert.equal(files.project, path.join(root, '.local-llm-worker.json'));
+    assert.equal(files.project, path.join(root, '.localize.json'));
+  });
+
+  test('old local-llm-worker config files are still used until a new one exists', async () => {
+    const root = await tmpdir();
+    const env = { XDG_CONFIG_HOME: root };
+    assert.equal(projectConfigPath(root), path.join(root, '.localize.json'));
+    await write(path.join(root, '.local-llm-worker.json'), '{}');
+    await write(path.join(root, 'local-llm-worker/config.json'), '{}');
+    assert.equal(projectConfigPath(root), path.join(root, '.local-llm-worker.json'));
+    assert.equal(userConfigPath(env), path.join(root, 'local-llm-worker/config.json'));
+    await write(path.join(root, '.localize.json'), '{}');
+    assert.equal(projectConfigPath(root), path.join(root, '.localize.json'));
   });
 
   test('configure set/unset, unknown key rejected, re-read without restart', async () => {
@@ -421,7 +434,7 @@ describe('config', SUITE, () => {
       assert.equal(report.effective.model, 'a');
       assert.equal(report.sources.model, 'project');
       assert.deepEqual(report.resolved_models, { offload: 'a', delegate: 'b', research: 'a' });
-      const file = JSON.parse(await fs.readFile(path.join(root, '.local-llm-worker.json'), 'utf8'));
+      const file = JSON.parse(await fs.readFile(path.join(root, '.localize.json'), 'utf8'));
       assert.deepEqual(file, { model: 'a', delegate_model: 'b', num_ctx: 4096 });
 
       report = JSON.parse(await configure({ set: { delegate_model: null } , scope: 'project' }, ctx));
@@ -436,7 +449,7 @@ describe('config', SUITE, () => {
       await assert.rejects(configure({ set: { max_attempts: 11 } }, ctx), /from 1 to 10/);
 
       // Edited by hand: the next call sees it.
-      await fs.writeFile(path.join(root, '.local-llm-worker.json'), JSON.stringify({ model: 'b' }));
+      await fs.writeFile(path.join(root, '.localize.json'), JSON.stringify({ model: 'b' }));
       assert.equal((await loadConfig(ctx)).config.model, 'b');
     } finally {
       await be.close();
@@ -688,7 +701,7 @@ describe('MCP stdio', SUITE, () => {
     const init = await rpc({ id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {} } });
     assert.equal(init.result.protocolVersion, '2024-11-05');
     assert.deepEqual(init.result.capabilities, { tools: {} });
-    assert.equal(init.result.serverInfo.name, 'local-llm-worker');
+    assert.equal(init.result.serverInfo.name, 'localize');
     child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
     const list = await rpc({ id: 2, method: 'tools/list' });
     assert.deepEqual(list.result.tools.map((t) => t.name).sort(), ['configure', 'delegate', 'offload', 'research']);
@@ -737,7 +750,7 @@ describe('SessionStart hook', () => {
 
   test('a broken config file does not break session start', async () => {
     const home = await tmpdir('llw-home-');
-    await write(path.join(home, '.config/local-llm-worker/config.json'), '{ nope');
+    await write(path.join(home, '.config/localize/config.json'), '{ nope');
     const r = await runHook({ HOME: home, XDG_CONFIG_HOME: path.join(home, '.config') });
     assert.equal(r.code, 0);
     assert.match(JSON.parse(r.out).hookSpecificOutput.additionalContext, /- offload:/);

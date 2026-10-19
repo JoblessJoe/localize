@@ -391,9 +391,9 @@ describe('A2 config', SUITE, () => {
   test('bad JSON in a config file names the file', async () => {
     const root = await makeRepo();
     const ctx = await makeCtx(root);
-    await write(path.join(root, '.local-llm-worker.json'), '{"model": ');
-    await assert.rejects(configure({}, ctx), (err) => err.message.includes(path.join(root, '.local-llm-worker.json')) && /Invalid JSON/.test(err.message));
-    await assert.rejects(offload({ task: 'q', files: ['README.md'] }, ctx), /Invalid JSON in .*\.local-llm-worker\.json/);
+    await write(path.join(root, '.localize.json'), '{"model": ');
+    await assert.rejects(configure({}, ctx), (err) => err.message.includes(path.join(root, '.localize.json')) && /Invalid JSON/.test(err.message));
+    await assert.rejects(offload({ task: 'q', files: ['README.md'] }, ctx), /Invalid JSON in .*\.localize\.json/);
   });
 
   test('api_key never appears in errors, even when the backend echoes it', async () => {

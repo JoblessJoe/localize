@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "local-llm-worker": {
+    "localize": {
       "command": "node",
       "args": [
         "${CLAUDE_PLUGIN_ROOT}/src/index.js"

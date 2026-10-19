@@ -1,6 +1,6 @@
 {
   "name": "localize-mcp",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Local LLM does Claude's bulk work: reads logs and files, researches the web, writes test-gated code.",
   "type": "module",
   "main": "src/worker.js",
